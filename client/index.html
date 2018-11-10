@@ -1,0 +1,86 @@
+<canvas id="plansza" width="500" height="500" style="border:1px solid black"></canvas> 
+
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js">
+//prosi o plik
+</script>
+
+<script>
+var socket = io();
+//rozpoczyna połaczenie między klientem a serwerem
+//emituje wiadomość do nasłuchu
+var plansza = document.getElementById("plansza").getContext("2d");
+plansza.font = '30px Calibri';
+    
+var Img = {};
+    Img.player = new Image();
+    Img.player.src = '/client/img/player.png';
+    Img.map = new Image();
+    Img.map.src = '/client/img/desert.png';
+   
+var Player = function(initPack){
+        var info = {};
+        info.id = initPack.id;
+        info.number = initPack.number;
+        info.x = initPack.x;
+        info.y = initPack.y;
+    
+    info.draw = function(){
+        var width = Img.player.width*2;
+        var height = Img.player.height*2;
+    }
+plansza.drawImage(Img.player,0,0);
+           
+}
+
+    var drawPlayer = function(){
+        plansza.drawImage(Img.player,0,0);
+    }
+socket.on('zmianyPozycji',function(data){ 
+    plansza.clearRect(0,0,500,500); //czyści planszę
+    for (var i = 0; i < data.length; i++)
+    plansza.fillText(data[i].number,data[i].x,data[i].y); //wyświetla text w canvas
+      
+    });
+    
+       
+    var drawMap = function(){
+        plansza.drawImage(Img.map,0,0);
+    }
+    
+    setInterval(function(){
+        plansza.clearRect(0,0,500,500);
+        drawMap();
+        drawPlayer();
+    },1);
+
+    document.onkeydown = function(event){
+        //klawisz D
+        if(event.keyCode === 68)
+            socket.emit('klikP',{inputId:'right',state:true});
+        //klawisz S
+        else if(event.keyCode === 83)   
+            socket.emit('klikP',{inputId:'down',state:true});
+        //klawisz A 
+        else if(event.keyCode === 65) 
+            socket.emit('klikP',{inputId:'left',state:true});
+        //klawisz W
+        else if(event.keyCode === 87) 
+            socket.emit('klikP',{inputId:'up',state:true});
+           
+    }
+    document.onkeyup = function(event){
+        //klawisz D
+        if(event.keyCode === 68)    
+            socket.emit('klikP',{inputId:'right',state:false});
+        //klawisz S
+        else if(event.keyCode === 83)   
+            socket.emit('klikP',{inputId:'down',state:false});
+        //klawisz A
+        else if(event.keyCode === 65) 
+            socket.emit('klikP',{inputId:'left',state:false});
+        //klawisz W
+        else if(event.keyCode === 87) 
+            socket.emit('klikP',{inputId:'up',state:false});
+    }
+</script>
