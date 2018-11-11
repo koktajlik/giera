@@ -1,91 +1,92 @@
-
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
 
-app.get('/',function(req, res){
-    res.sendFile(__dirname + '/client/index.html');
-});//localkost:200
+app.get('/',function(req, res) {
+	res.sendFile(__dirname + '/client/index.html');
+});
 app.use('/client',express.static(__dirname + '/client'));
-//localhost:2000/client i dalsze jego pliki
-serv.listen(2000)
+
+serv.listen(2000);
 console.log("Server started.");
 
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 
 var Player = function(id){
-    //konstruktor
-    var info = {
-        x:300,
-        y:300,
-        id:id,
-        number:"" + Math.floor(10 * Math.random()),//floor zwraca liczbe
-        pressingUp:false,
-        pressingLeft:false,
-        pressingRight:false,
-        pressingDown:false,
-        maxSpeed:10,
-        //lol jak będzie true to nie można zatrzymać
-    }
-    info.updatePosition = function(){
-        if(info.pressingUp)
-            info.y -= info.maxSpeed;
-        if(info.pressingLeft)
-            info.x -= info.maxSpeed;
-        if(info.pressingRight)
-            info.x += info.maxSpeed;
-        if(info.pressingDown)
-            info.y += info.maxSpeed;
-    }
-    
-    return info;
-} 
+	var self = {
+		x:250,
+		y:250,
+		id:id,
+		number:"" + Math.floor(10 * Math.random()),
+		pressingRight:false,
+		pressingLeft:false,
+		pressingUp:false,
+		pressingDown:false,	
+		maxSpd:10,
+	}
+	self.updatePosition = function(){
+		if(self.pressingRight)
+			self.x += self.maxSpd;
+		if(self.pressingLeft)
+			self.x -= self.maxSpd;
+		if(self.pressingUp)
+			self.y -= self.maxSpd;
+		if(self.pressingDown)
+			self.y += self.maxSpd;
+	}
+	return self;
+}
 
-var io = require('socket.io')(serv,{}); //ładuje i inicjalizuje pliki io i całą bibliotekę
-io.sockets.on('connection',function(socket){   
-    socket.id = Math.random();
-    SOCKET_LIST[socket.id] = socket;
-    
-    var player = Player(socket.id);
-    PLAYER_LIST[socket.id] = player; //dodawanie gracza do listy
-    
-    socket.on('disconnect',function(){
-        delete SOCKET_LIST[socket.id];
-        //usuwanie id żeby player zniknął z ekranu po opuszczeniu
-        delete PLAYER_LIST[socket.id];
-    });
-    
-    socket.on('klikP',function(data){
-        if(data.inputId === 'up')
-            player.pressingUp = data.state;
-        else if(data.inputId === 'left')
-            player.pressingLeft = data.state;
-        else if(data.inputId === 'right')
-            player.pressingRight = data.state;
-        else if(data.inputId === 'down')
-            player.pressingDown = data.state;
-    });
+var io = require('socket.io')(serv,{});
+io.sockets.on('connection', function(socket){
+	socket.id = Math.random();
+	SOCKET_LIST[socket.id] = socket;
 
+	var player = Player(socket.id);
+	PLAYER_LIST[socket.id] = player;
+	
+	socket.on('disconnect',function(){
+		delete SOCKET_LIST[socket.id];
+		delete PLAYER_LIST[socket.id];
+	});
+	  socket.on('sendMsgToServer',function(data){
+        var playerName = ("" + socket.id).slice(2,7);
+        for(var i in SOCKET_LIST){
+            SOCKET_LIST[i].emit('addToChat',playerName + ': ' + data);
+        }
+    });
+	socket.on('keyPress',function(data){
+		if(data.inputId === 'left')
+			player.pressingLeft = data.state;
+		else if(data.inputId === 'right')
+			player.pressingRight = data.state;
+		else if(data.inputId === 'up')
+			player.pressingUp = data.state;
+		else if(data.inputId === 'down')
+			player.pressingDown = data.state;
+	});
+	
+	
 });
 
 setInterval(function(){
-    var pack = []; //info o graczach
-    for(var i in PLAYER_LIST){
-        var player = PLAYER_LIST[i];
-        player.updatePosition();
-        pack.push({
-            x:player.x,
-            y:player.y,
-            number:player.number
-        //dodaje do talicy noweelemnty i ją poszerza
-    });
-        
-    }
-            
-        for(var i in SOCKET_LIST){
-        var socket = SOCKET_LIST[i];
-        socket.emit('zmianyPozycji',pack);
-}
-},1000/60) 
-//wywołuje funkcję z opóźnieniem czasowym - 60 klatek na sekundę
+	var pack = [];
+	for(var i in PLAYER_LIST){
+		var player = PLAYER_LIST[i];
+		player.updatePosition();
+		pack.push({
+			x:player.x,
+			y:player.y,
+			number:player.number
+		});		
+	}
+	for(var i in SOCKET_LIST){
+		var socket = SOCKET_LIST[i];
+		socket.emit('newPositions',pack);
+	}
+	
+	
+	
+	
+},1000/25);
