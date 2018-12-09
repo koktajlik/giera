@@ -1,0 +1,50 @@
+MongoDB 101
+mongod.exe: start databas
+mongo.exe: client to send queries
+
+database
+	collection0
+		document0
+		document1
+		document2
+		...
+	collention1
+		document0
+		document1
+		document2
+		...
+	...
+
+myGame
+	account
+		{username:"qwerty",password:"qwerty"}
+		{username:"user2",password:"pass2"}
+		{username:"user3",password:"pass3"}
+	progess
+		{username:"qwerty",level:12,questComplete:['myQuest','myQuest2']}
+		{username:"user2",level:6,questComplete:['myQuest2']}
+
+create database
+	use <DATABASE_NAME>
+	use myGame
+
+create collection
+	db.createCollection("account");
+	db.createCollection("account");
+
+add document
+	db.account.insert({username:"qwerty",password:"qwerty"})
+	db.account.insert({username:"user2",password:"pass2"})
+	db.progress.insert({username:"qwerty",level:12,questComplete:['myQuest','myQuest2']})
+
+read document
+	db.<COLLETION>.find(<MUST MATCH>);
+	db.progress.find({username:"qwerty"});
+	
+	db.<COLLETION>.find(<MUST MATCH>,<TO RETRIEVE>);
+	db.account.find({username:"qwerty"},{level:1}) //pokaze id
+	db.progress.find({username:"qwerty"},{level:1} //pokaze level
+
+update
+	db.<COLLETION>.update(<MUST MATCH>,{$set:<NEW VALUES>});
+	db.progress.update({username:"qwerty"},{$set:{level:90}});
