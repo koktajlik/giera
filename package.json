@@ -10,7 +10,7 @@
   },
     "engines":{
         "node": "10.13.x"
-    }
+    },
   "devDependencies": {},
   "scripts": {
     "start": "node app.js"
