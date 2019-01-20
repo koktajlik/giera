@@ -8,9 +8,12 @@
     "mongojs": "^2.6.0",
     "socket.io": "^2.1.1"
   },
+    "engines":{
+        "node": "10.13.x"
+    }
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "author": "",
   "license": "ISC"
