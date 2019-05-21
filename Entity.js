@@ -2,7 +2,7 @@
 var initPack = {player:[],bullet:[]};
 var removePack = {player:[],bullet:[]};
 
-
+//game
 
 Entity = function(param){
 	var self = {
