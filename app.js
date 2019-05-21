@@ -16,7 +16,7 @@ app.use('/client',express.static(__dirname + '/client'));
 serv.listen(process.env.PORT || 2000);
 console.log("Server started.");
 
-var SOCKET_LIST = {};
+SOCKET_LIST = {};
 
 
 var DEBUG = true;
